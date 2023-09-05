@@ -65,9 +65,9 @@ if(sizeOf(vars.acc)== 0) [payload] else vars.acc ++ [payload]]]></ee:set-variabl
 				</ee:variables>
 			</ee:transform>
 		</foreach>
-		<ee:transform doc:name="Transform Message" doc:id="5bf1aeac-a33f-4527-9d83-55a01581e42f" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="Transform Message" doc:id="5bf1aeac-a33f-4527-9d83-55a01581e42f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 vars.acc]]></ee:set-payload>

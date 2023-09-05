@@ -5,19 +5,17 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="4cfeff9f-8d8f-4bc1-9104-9fd7ade57481" >
-		<http:listener-connection host="0.0.0.0" port="8082" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f2f05d37-80d0-4a71-b097-a684dcd2f327" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
 	</http:listener-config>
-	<flow name="hello-worldFlow" doc:id="73d52b83-c3c3-428a-9ca9-85fd6e346f14" >
-		<http:listener doc:name="Listener" doc:id="c7cf5c58-8070-4065-a70e-be4c0695bf5a" config-ref="HTTP_Listener_config" path="/hello"/>
-		<ee:transform doc:name="Transform Message" doc:id="f28baf07-fb77-4f4f-906a-3886a3fb583e" >
+	<flow name="munit-flow1Flow" doc:id="29901728-197e-4cf2-987f-0423e29854d1" >
+		<http:listener doc:name="Listener" doc:id="00653f15-55de-4244-aa96-2e538d2162fe" config-ref="HTTP_Listener_config" path="/munit1" allowedMethods="POST"/>
+		<ee:transform doc:name="Transform Message" doc:id="d2811928-383a-4e3e-94a9-7211281384a9" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-{
-	"Message": "hello world"
-}]]></ee:set-payload>
+"message": "hello world"]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
