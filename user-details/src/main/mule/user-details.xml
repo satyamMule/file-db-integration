@@ -73,6 +73,5 @@ output application/json
 vars.acc]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="333bd310-d3fa-446b-8a19-ed6fedaaaf48" message="flow has been completed successfully"/>
 	</flow>
 </mule>
