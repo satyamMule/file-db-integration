@@ -9,5 +9,4 @@ https:
   system:
     api:
       reqres:
-        url: https://reqres.in/api/users
-        
+        url: dummyurl

@@ -28,7 +28,7 @@ output application/json
 				<ee:set-variable variableName="acc" ><![CDATA[[]]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<http:request method="GET" doc:name="ReqRes request" doc:id="2303e7f8-2df5-4eca-b5ce-dab71337689e" config-ref="HTTP_Request_Config" url="https://reqres.in/api/users">
+		<http:request method="GET" doc:name="ReqRes request" doc:id="2303e7f8-2df5-4eca-b5ce-dab71337689e" config-ref="HTTP_Request_Config" url="${https.system.api.reqres.url}">
 			<http:query-params ><![CDATA[#[output application/java
 ---
 {
