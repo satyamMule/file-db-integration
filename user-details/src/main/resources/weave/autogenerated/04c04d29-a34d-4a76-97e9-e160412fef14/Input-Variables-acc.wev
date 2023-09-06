@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_04c04d29_a34d_4a76_97e9_e160412fef14_Input_Variables_acc = Array<Nothing>
+

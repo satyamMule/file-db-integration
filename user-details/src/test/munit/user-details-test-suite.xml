@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="user-details-test-suite.xml" />
+	<munit:test name="user-details-test-suite" doc:id="7b04ab4f-6666-4ca3-b209-b0de573a7dd2" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock reqres http request" doc:id="d3081a18-90a2-4572-aa0d-e33773406924" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="2303e7f8-2df5-4eca-b5ce-dab71337689e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json --- readUrl("classpath://reqResResponse.json", "application/json")]' mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock salary data" doc:id="fbda5568-2920-4621-8bf5-cc93dce0a526" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3f11194e-b5ac-45db-9bd2-bf262b79ab19" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-call flow="mocked-flow" />
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set query parameters" doc:id="7f88b243-7c66-4a0c-a4ff-de78ddf71029" >
+				<munit:attributes value="#[queryParams: {page:1}]" />
+			</munit:set-event>
+			<flow-ref doc:name="calling user-salaryFlow" doc:id="50200aec-a352-42d2-b6a1-b7462828290a" name="user-salaryFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="20d5e716-c84f-45f5-aaa9-36eaa7436f7f" expression="#[payload]" is='#[MunitTools::equalTo(readUrl("classpath://finalOutput.json", "application/json"))]' message="payload is not same"/>
+		</munit:validation>
+	</munit:test>
+	<flow name="mocked-flow" doc:id="a518191d-580d-433a-a82f-07942a1b6108" >
+		<choice doc:name="Choice" doc:id="b6ae8083-3bbd-4285-aaf4-5b50d5b33c09" >
+			<when expression="#[vars.counter==1]">
+				<set-variable value="10000" doc:name="Set Variable" doc:id="e1409998-cefd-4de8-b3a5-e1c661e70c29" variableName="salaryVar"/>
+			</when>
+			<when expression="#[vars.counter==2]">
+				<set-variable value="20000" doc:name="Set Variable" doc:id="c59d89e7-72f6-4cc9-81f6-43e3d8edfc8e" variableName="salaryVar"/>
+			</when>
+			<otherwise >
+				<set-variable value="30000" doc:name="Set Variable" doc:id="dd6a3772-87e7-4179-9333-356a7083ca07" variableName="salaryVar"/>
+			</otherwise>
+		</choice>
+
+	</flow>
+
+
+</mule>
