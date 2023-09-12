@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="user-salaryFlow" doc:id="0a89204c-8987-46e2-bb12-35457058d56c" >
+		<http:listener doc:name="Listener" doc:id="d8eea573-483c-4e4c-a615-7bfdb1db2104" config-ref="HTTP_Listener_config" path="${http.listner.path}" allowedMethods="GET" />
+		<ee:transform doc:name="Transform Message" doc:id="0b54ba69-8627-4cc9-b295-8543489146d9" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="page" ><![CDATA[attributes.queryParams.page default 1]]></ee:set-variable>
+				<ee:set-variable variableName="acc" ><![CDATA[{}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="c6c20c70-4bcf-4bce-b5c9-f135820ebd37" config-ref="HTTP_Request_Config" url="https://reqres.in/api/users" >
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"page" : vars.page
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message1" doc:id="9d6ec135-cc61-47b2-8a0d-df8e8154ff4f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables />
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="f7a6d6b9-db7a-4b5d-afc2-4f7d2c7cd33c" collection="#[payload.data]" >
+			<ee:transform doc:name="Transform Message1" doc:id="2bfdd2a5-521c-4cb8-b3e0-398b15765b98" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload ++ {
+	"name": "Satyam"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<ee:transform doc:name="Transform Message2" doc:id="db22d710-7c76-4a54-9b7d-0309e48247c2" >
+				<ee:message />
+				<ee:variables >
+					<ee:set-variable variableName="acc" ><![CDATA[%dw 2.0
+output application/json
+---
+if(sizeOf(vars.acc)== 0) [payload] else vars.acc ++ [payload]]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</foreach>
+		<ee:transform doc:name="Transform Message2" doc:id="f24b382d-ae8e-4c08-b229-095ab9465b75" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.acc]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,7 @@
+http:
+  listner:
+    host: localhost
+    port: '8081'
+    path: /userSalary
+    connection:
+      timeout: '60000'
