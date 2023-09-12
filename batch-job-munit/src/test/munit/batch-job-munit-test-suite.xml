@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="batch-job-munit-test-suite.xml" />
+	<munit:test name="batch-job-munit-test-suite" doc:id="3460d6dd-08fe-43dc-8bf3-ad8ce109d59a" description="Test">
+		<munit:behavior >
+			<munit-tools:spy doc:name="Spy" doc:id="94c0a4dd-0f68-4af1-b01d-0410117753c9" processor="logger">
+			<munit-tools:with-attributes>
+				<munit-tools:with-attribute whereValue="Logger" attributeName="doc:name" />
+				<munit-tools:with-attribute whereValue="d9c9bd9d-95a1-49ba-9965-7738f82e685a" attributeName="doc:id" />
+			</munit-tools:with-attributes>
+			<munit-tools:before-call>
+				<munit-tools:assert-equals doc:name="Assert equals" doc:id="be7c7242-1c89-4f73-be70-80c31696f2c9" actual="#[payload.stepResults[0].successfulRecords]" expected="#[22]" message='#["count is not matching for batch step 1"]' />
+					<munit-tools:assert-equals doc:name="Assert equals" doc:id="ba76d982-f8fd-46ff-9b84-a472203f881e" actual="#[payload.successfulRecords]" expected="#[22]" message='#["Wrong number of records has been processed"]' />
+			</munit-tools:before-call>
+		</munit-tools:spy>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="419c9dcf-de7d-4076-b169-becbe5580cb4" >
+				<munit:payload value='#[output application/json --- readUrl("classpath://batch-job-munit/inputData.csv", "application/csv")]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to batch-job-munitFlow" doc:id="7cd4045c-59b2-4a78-82b6-0c021778a589" name="batch-job-munitFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:sleep time="10000" doc:name="Sleep" doc:id="cfae4868-6656-434b-a386-6b24a0c3e025" />
+			<munit-tools:verify-call doc:name="Verify call" doc:id="b9eee273-6997-45c3-a2ad-79f6b9fb58f1" processor="file:write" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Write" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="2bedbdd3-7c3b-4b08-9bb1-b77f9c48df0b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

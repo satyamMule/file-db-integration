@@ -1,0 +1,7 @@
+file:
+  input:
+    directory: C:/Users/satyamkumar01/OneDrive - Nagarro/Desktop/files/inputFiles/
+    filename: empdata*.csv
+  output:
+    directory: C:/Users/satyamkumar01/OneDrive - Nagarro/Desktop/files/outputFiles/
+    filename: arc_empdata
