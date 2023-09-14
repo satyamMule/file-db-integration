@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a9a5e25e-f8e9-4a30-be76-9aafeeaa5934" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="236acb11-4006-41ee-a4c8-c839fffbad0b" />
+	<flow name="salary-flow" doc:id="3dc863ce-aded-4244-ad49-e24948317bdc" >
+		<ee:transform doc:name="get salary details" doc:id="022b2ded-321b-4a7f-87af-eaf317658f7d">
+				<ee:message>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="salary"><![CDATA[%dw 2.0
+var myInput = readUrl("classpath://empSalary.xlsx", "application/xlsx")
+output application/json
+---
+( myInput.amount filter ((item, index) -> item.id == payload.id)).salary[0]]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+	</flow>
+	<flow name="munit-parallel-foreachFlow" doc:id="debfcf56-1c59-4d9b-a479-77a44439a97e" >
+		<http:listener doc:name="Listener" doc:id="65c1d2d6-f228-4f83-9cda-94101faadf05" config-ref="HTTP_Listener_config" path="/parallelforeach" allowedMethods="POST">
+			<http:error-response >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="171f3fdb-9ccd-4c0b-8ea2-8443bd5204d4" message="parallel foreach flow has been started with payload --&gt; #[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="e6aacf34-1e43-4358-907b-5a16e8fcd356" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.feeds map ((item, index) -> {
+    "id": item.id,
+    "title": item.title,
+    "language": item.lng,
+    "userId": item.userId,
+    "name": item.name,
+    "activeInd": item.isdeleted
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<parallel-foreach doc:name="Parallel For Each" doc:id="d60e9917-3f4c-42ea-89d8-969c8a882dfb" collection="#[payload]" maxConcurrency="10">
+			<logger level="INFO" doc:name="Logger" doc:id="2987c2b7-a191-4f62-b472-d40a7fed0f23" message="foreach loop started withpayload -- &gt; #[payload]" />
+			<flow-ref doc:name="Flow Reference" doc:id="238fbad6-5ec7-4809-a868-123771d6d1b3" name="salary-flow" />
+			<try doc:name="Try" doc:id="376cf09c-ae0c-46ea-9feb-2808590cc485">
+					<ee:transform doc:name="Transform Message" doc:id="ecf23a7d-8c3a-461d-a3fd-d1278d1a7f25">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "id": payload.id/2,
+    "title": payload.title,
+    "language": payload.lng,
+    "userId": payload.userId,
+    "name": payload.name,
+    "activeInd": payload.isdeleted
+} ++ {
+    "salay": vars.salary
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+					<error-handler>
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0275e0d9-d903-4d4e-8760-91b36ea5a194">
+							<ee:transform doc:name="Transform Message" doc:id="d112a6ce-84ac-40d4-857f-9449f4863425">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[payload ++ { "errorDetails": error.description }]]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+						<logger level="INFO" doc:name="Logger" doc:id="a81abed3-5865-42fc-ad3d-76d3a63a0fb5" message="#[payload]" />
+							<file:write doc:name="Write" doc:id="67621b0f-42b7-4a5d-8a12-4936ff33e98f" config-ref="File_Config" path="C:\Users\satyamkumar01\OneDrive - Nagarro\Desktop\files\failure\failureData.json" createParentDirectories="false" />
+						</on-error-continue>
+					</error-handler>
+				</try>
+			<logger level="INFO" doc:name="Logger" doc:id="bbea26eb-bf27-4640-93ae-79fc99bc55d7" message="parallel foreach has been completed with payload --- #[payload] " />
+		</parallel-foreach>
+		<ee:transform doc:name="successful records" doc:id="bbe7063c-55db-443a-b5c7-56e882dcb49a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload.payload filter ((item, index) -> item.errorDetails == null)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="success-file" doc:id="6899af94-33a3-45b5-82b9-bf406e2db78a" config-ref="File_Config" path="C:\Users\satyamkumar01\OneDrive - Nagarro\Desktop\files\success\successfile.csv" createParentDirectories="false"/>
+		<ee:transform doc:name="Transform Message" doc:id="4943149b-a194-4496-9d55-cbe4dc36a978" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "parallel foreach process has been completed"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
